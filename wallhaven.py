@@ -1,8 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
-import re
 import sys
-import ctypes
 
 from pathlib import Path
 
@@ -26,9 +24,7 @@ if(sys.argv[2:]):
 file_path_to_save = DOWNLOAD_PATH.format(search_query=query,script_name=scriptname)
 
 # file_path_to_save = DOWNLOAD_PATH
-print("Download Path: "+file_path_to_save)
-path = Path(file_path_to_save).expanduser()
-path.mkdir(parents=True,exist_ok=True)
+
 
 # ROOT_URL = ROOT_URL.format(search_query=query,screen_ration='16x9',page_number='{page_number}')
 ROOT_URL = ROOT_URL.format(search_query=query,page_number='{page_number}',screen_ration=ration)
@@ -43,16 +39,21 @@ def generate_downloadable_image_url(response,session):
     if len(divs) < 1:
         print("No More Image Found Here! ")
         sys.exit()
-    for div in divs:
-        pass
-        wall_id = div['data-wallpaper-id']
-        print(wall_id)
-        img_response = session.get('https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-{iid}.jpg'.format(iid=wall_id), stream=True)
-        with open(path/Path(wall_id + '.jpg'), 'wb') as f:
-            for chunk in img_response.iter_content():
-                if chunk:
-                    f.write(chunk)
-            total_downloaded+=1
+    else:
+        print("Download Path: "+file_path_to_save)
+        path = Path(file_path_to_save).expanduser()
+        path.mkdir(parents=True,exist_ok=True)
+        #irerate the image figures
+        for div in divs:
+            pass
+            wall_id = div['data-wallpaper-id']
+            print(wall_id)
+            img_response = session.get('https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-{iid}.jpg'.format(iid=wall_id), stream=True)
+            with open(path/Path(wall_id + '.jpg'), 'wb') as f:
+                for chunk in img_response.iter_content():
+                    if chunk:
+                        f.write(chunk)
+                total_downloaded+=1
 
 with requests.Session() as session:
     session.headers.update({'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'})
