@@ -2,27 +2,36 @@ from bs4 import BeautifulSoup
 import requests
 import re
 import sys
+import ctypes
+
 from pathlib import Path
+
 
 # ROOT_URL = 'https://alpha.wallhaven.cc/search?q=models&search_image=&page={page_number}'
 ROOT_URL = 'https://alpha.wallhaven.cc/search?q={search_query}&ratios={screen_ration}&page={page_number}'
-DOWNLOAD_PATH = '~/.config/variety/Downloaded/wallhaven_alpha_wallhaven_cc_search_q_women'
-# DOWNLOAD_PATH = '~/Downloads/{script_name}/{search_query}'
+# DOWNLOAD_PATH = '~/.config/variety/Downloaded/wallhaven_alpha_wallhaven_cc_search_q_women'
+DOWNLOAD_PATH = '~/Downloads/{script_name}/{search_query}'
+
+
 
 if len(sys.argv) < 2:
     print("Enter Search Keyword | ex-> models,id:949,tanned etc")
     sys.exit()
-# scriptname = sys.argv[0].replace('.py','')
+scriptname = sys.argv[0].replace('.py','')
 query = sys.argv[1] #taking search query arg from cli
-# file_path_to_save = DOWNLOAD_PATH.format(search_query=query,script_name=scriptname)
+ration = '' 
+if(sys.argv[2:]):
+    ration = sys.argv[2] #taking screen ration arg from cli
 
-file_path_to_save = DOWNLOAD_PATH
+file_path_to_save = DOWNLOAD_PATH.format(search_query=query,script_name=scriptname)
+
+# file_path_to_save = DOWNLOAD_PATH
 print("Download Path: "+file_path_to_save)
 path = Path(file_path_to_save).expanduser()
 path.mkdir(parents=True,exist_ok=True)
 
 # ROOT_URL = ROOT_URL.format(search_query=query,screen_ration='16x9',page_number='{page_number}')
-ROOT_URL = ROOT_URL.format(search_query=query,page_number='{page_number}',screen_ration='')
+ROOT_URL = ROOT_URL.format(search_query=query,page_number='{page_number}',screen_ration=ration)
 # print("Search Url:"+ROOT_URL)
 
 total_downloaded = 0
@@ -50,6 +59,12 @@ with requests.Session() as session:
     response = session.get(ROOT_URL.format(page_number=1))
     if response.ok:
         soup = BeautifulSoup(response.text, 'html.parser')
+        divs = soup.find_all('figure', attrs={'class': 'thumb'})
+        
+        if len(divs) < 1:
+            print("No Image Found!")
+            sys.exit()
+        
         count = soup.find('h2').text.split("/")[-1].strip()
         print("Total Page Count: "+count)
         for page_number in range(1,int(count)+1):
