@@ -9,3 +9,9 @@
 ```python
 "pip install beautifulsoup4"
 ```
+## Usage
+
+search by keyword
+```python
+"python3 wallhaven.py cats"
+```
