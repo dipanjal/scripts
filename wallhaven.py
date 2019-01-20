@@ -73,5 +73,5 @@ with requests.Session() as session:
             response = session.get(current_page_url)
             print(current_page_url)
             generate_downloadable_image_url(response,session)
-        print("Total Downloaded: "+total_downloaded)        
+        print("Total Downloaded: ",total_downloaded)
 
