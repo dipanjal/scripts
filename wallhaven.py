@@ -120,7 +120,7 @@ with requests.Session() as session:
             current_page_url = ROOT_URL
             if URL_TYPE != 'TAG':
                 current_page_url=ROOT_URL.format(page_number=page_number)
-
+                
             #dumping page  
             response = session.get(current_page_url)
             print('Downloading From: ',current_page_url)
