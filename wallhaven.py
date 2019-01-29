@@ -6,6 +6,7 @@ import argparse
 import re
 import datetime
 import os
+import time
 from pathlib import Path
 
 ROOT_URL = 'https://alpha.wallhaven.cc/search?q={search_query}&ratios={screen_ration}&page={page_number}'
@@ -37,14 +38,18 @@ def generate_downloadable_image_url(response,session):
         for div in divs:
             pass
             wall_id = div['data-wallpaper-id']
-            img_response = session.get('https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-{iid}.jpg'.format(iid=wall_id), stream=True)
-            if img_response.ok:
-                print(wall_id+'.jpg')
-                with open(path/Path(wall_id + '.jpg'), 'wb') as f:
-                    for chunk in img_response.iter_content():
-                        if chunk:
-                            f.write(chunk)
-                    total_downloaded+=1
+            try:
+                img_response = session.get('https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-{iid}.jpg'.format(iid=wall_id), stream=True)
+                if img_response.ok:
+                    print(wall_id+'.jpg')
+                    with open(path/Path(wall_id + '.jpg'), 'wb') as f:
+                        for chunk in img_response.iter_content():
+                            if chunk:
+                                f.write(chunk)
+                        total_downloaded+=1
+            except Exception as identifier:
+                print(identifier)
+                time.sleep(15)
         return True
 
 
@@ -104,32 +109,38 @@ with requests.Session() as session:
     request_url = ROOT_URL
     if URL_TYPE != 'TAG':
         request_url = ROOT_URL.format(page_number=1)
-    response = session.get(request_url)
-    if response.ok:
-        soup = BeautifulSoup(response.text, 'html.parser')
-        divs = soup.find_all('figure', attrs={'class': 'thumb'})
-        
-        if len(divs) < 1:
-            print("No Image Found!")
-            sys.exit()
-        # count = soup.find('h2').text.split("/")[-1].strip()
-        # print("Total Page Count: ",soup.find('h2'))
-        page_number = 1
-        flag = True
-        while flag:
-            current_page_url = ROOT_URL
-            if URL_TYPE != 'TAG':
-                current_page_url=ROOT_URL.format(page_number=page_number)
-                
-            #dumping page  
-            response = session.get(current_page_url)
-            print('Downloading From: ',current_page_url)
-            flag = generate_downloadable_image_url(response,session)
-            page_number+=1
 
-            if URL_TYPE == 'TAG':
-                flag = False
+    try:
+        response = session.get(request_url)
+        if response.ok:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            divs = soup.find_all('figure', attrs={'class': 'thumb'})
+            
+            if len(divs) < 1:
+                print("No Image Found!")
+                sys.exit()
+            # count = soup.find('h2').text.split("/")[-1].strip()
+            # print("Total Page Count: ",soup.find('h2'))
+            page_number = 1
+            flag = True
+            while flag:
+                current_page_url = ROOT_URL
+                if URL_TYPE != 'TAG':
+                    current_page_url=ROOT_URL.format(page_number=page_number)
+                    
+                #dumping page  
+                response = session.get(current_page_url)
+                print('Downloading From: ',current_page_url)
+                flag = generate_downloadable_image_url(response,session)
+                page_number+=1
 
-        print("Total Downloaded: ",total_downloaded)
+                if URL_TYPE == 'TAG':
+                    flag = False
+
+            print("Total Downloaded: ",total_downloaded) 
+    except Exception as excp:
+        print(excp)
+        pass
+    
 
 
