@@ -39,7 +39,7 @@ def generate_downloadable_image_url(response,session):
             pass
             wall_id = div['data-wallpaper-id']
             try:
-                img_response = session.get('https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-{iid}.jpg'.format(iid=wall_id), stream=True)
+                img_response = session.get('https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-{iid}.jpg'.format(iid=wall_id), stream=True,timeout=2)
                 if img_response.ok:
                     print(wall_id+'.jpg')
                     with open(path/Path(wall_id + '.jpg'), 'wb') as f:
