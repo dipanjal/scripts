@@ -1,7 +1,0 @@
-{'response': <Response [200]>, 'method': 'get', 'url': 'https://alpha.wallhaven.cc/search?q=sketchy&ratios=16x9&page=1', 'keyword': '', 'datetime': '01:52AM January 24, 2019'}
-{'response': <Response [200]>, 'method': 'get', 'url': 'https://alpha.wallhaven.cc/search?q=clivage&ratios=16x9&page=1', 'keyword': '', 'datetime': '01:53AM January 24, 2019'}
-{'response': <Response [200]>, 'method': 'get', 'url': 'https://alpha.wallhaven.cc/search?q=cleveage&ratios=16x9&page=1', 'keyword': '', 'datetime': '01:54AM January 24, 2019'}
-{'response': <Response [200]>, 'method': 'get', 'url': 'https://alpha.wallhaven.cc/search?q=clevage&ratios=16x9&page=1', 'keyword': '', 'datetime': '01:54AM January 24, 2019'}
-{'response': <Response [200]>, 'method': 'get', 'url': 'https://alpha.wallhaven.cc/search?q=playboy&categories=001&purity=010&ratios=16x9&sorting=relevance&order=desc&page=1', 'keyword': 'playboy', 'datetime': '02:17AM January 24, 2019'}
-{'response': <Response [200]>, 'method': 'get', 'url': 'https://alpha.wallhaven.cc/search?q=playboy&categories=001&purity=010&ratios=16x9&sorting=relevance&order=desc&page=1', 'keyword': 'playboy', 'datetime': '02:20AM January 24, 2019'}
-{'response': <Response [200]>, 'method': 'get', 'url': 'https://alpha.wallhaven.cc/search?q=&categories=001&purity=010&sorting=favorites&order=desc&page=1', 'keyword': 'January 24,2019', 'datetime': '02:48AM January 24, 2019'}
