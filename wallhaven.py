@@ -8,10 +8,16 @@ import datetime
 import os
 from pathlib import Path
 
-ROOT_URL = 'https://alpha.wallhaven.cc/search?q={search_query}&ratios={screen_ration}&page={page_number}'
+# ROOT_URL = 'https://alpha.wallhaven.cc/search?q={search_query}&ratios={screen_ration}&page={page_number}'
+ROOT_URL = 'https://alpha.wallhaven.cc/search'
 DOWNLOAD_PATH = '~/Downloads/{script_name}/{search_query}'
 URL_TYPE = ''
-
+keyword = ''
+payload = {
+    'q':'',
+    'ratios':'',
+    'page':1
+}
 scriptname = sys.argv[0].replace('.py','')
 file_path_to_save = DOWNLOAD_PATH.format(script_name=scriptname,search_query='{search_query}')
 
@@ -58,12 +64,19 @@ def parse_tags(request_url):
             tag = soup.find('h1', attrs={'class': 'tagname'}).text
             return tag
 
+
+def write_response_log(resp):
+    with open('log.txt','a') as file:
+        # data = '['+ datetime.datetime.today().strftime('%B %d,%Y') + ']\n'+url
+        file.write(str(resp)+"\n")
+
 # taking args from cli
 parser = argparse.ArgumentParser(prog='python3 wallhaven.py', usage='%(prog)s [-u|-w]')
 group = parser.add_mutually_exclusive_group()
 group.add_argument('-u','--url',nargs='?',const='fixed_url',action='store',type=url_regex_type,help='search by \"<fixed_url>\"')
 group.add_argument('-w','--keyword',nargs='?',const='keyword',action='store',type=str,help='search by keyword')
 parser.add_argument('-r','--ratio',nargs='?',const='ratio',action='store',help='set screen ratio')
+# parser.add_argument('-x','--extreme',const='extreme',action='store',help='set extreme')
 args = parser.parse_args()
 
 # args handlers
@@ -105,6 +118,14 @@ with requests.Session() as session:
     if URL_TYPE != 'TAG':
         request_url = ROOT_URL.format(page_number=1)
     response = session.get(request_url)
+    responseDict = {
+            'response':response,
+            'method':'get',
+            'url':request_url,
+            'keyword':keyword,
+            'datetime': datetime.datetime.today().strftime("%I:%M%p %B %d, %Y")
+        }
+    write_response_log(responseDict)
     if response.ok:
         soup = BeautifulSoup(response.text, 'html.parser')
         divs = soup.find_all('figure', attrs={'class': 'thumb'})
