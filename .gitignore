@@ -1,5 +1,6 @@
 .vscode/
-test.py
+.idea/
+tests/
 docker/
 map_test.html
 office_in_nikunjo.csv

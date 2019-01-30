@@ -1,13 +1,14 @@
-from bs4 import BeautifulSoup
-import requests
-import sys
-from pathlib import Path
 import argparse
-import re
 import datetime
+import imghdr
 import os
+import re
+import sys
 import time
 from pathlib import Path
+
+import requests
+from bs4 import BeautifulSoup
 
 ROOT_URL = 'https://alpha.wallhaven.cc/search?q={search_query}&ratios={screen_ration}&page={page_number}'
 DOWNLOAD_PATH = '~/Downloads/{script_name}/{search_query}'
@@ -16,11 +17,38 @@ URL_TYPE = ''
 scriptname = sys.argv[0].replace('.py','')
 file_path_to_save = DOWNLOAD_PATH.format(script_name=scriptname,search_query='{search_query}')
 
+
+# url validation
 def url_regex_type(s, pat=re.compile(r'^(ftp|http|https):\/\/[^ "]+$')):
     if not pat.match(s):
         print('unexpected or invalid url')
         raise argparse.ArgumentTypeError 
     return s
+
+
+# image exist or
+# if the image is corrupted
+def is_image_exist_or_corrupted(image_file):
+    if image_file.exists():
+        if imghdr.what(image_file.resolve()):
+            return True
+        os.remove(image_file.resolve())
+    return False
+
+
+def write_in_file(img_response,image_file):
+    try:
+        with open(image_file, 'wb') as f:
+            for chunk in img_response.iter_content():
+                if chunk:
+                    f.write(chunk)
+        return True
+        #
+            # return True
+            # print('finished: ' + wall_id)
+    except IOError :
+        return False
+
 
 # image downloaded
 def generate_downloadable_image_url(response,session):
@@ -31,25 +59,41 @@ def generate_downloadable_image_url(response,session):
         print("No More Image Found Here! ")
         return False
     else:
-        # print("Download Path: "+file_path_to_save)
-        path = Path(file_path_to_save).expanduser()
-        path.mkdir(parents=True,exist_ok=True)
+        directory_path = Path(file_path_to_save).expanduser()
+        directory_path.mkdir(parents=True,exist_ok=True)
+
         #irerate the image figures
         for div in divs:
-            pass
             wall_id = div['data-wallpaper-id']
-            try:
-                img_response = session.get('https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-{iid}.jpg'.format(iid=wall_id), stream=True,timeout=2)
-                if img_response.ok:
-                    print(wall_id+'.jpg')
-                    with open(path/Path(wall_id + '.jpg'), 'wb') as f:
-                        for chunk in img_response.iter_content():
-                            if chunk:
-                                f.write(chunk)
-                        total_downloaded+=1
-            except Exception as identifier:
-                print(identifier)
-                time.sleep(15)
+            image_file = directory_path/Path(wall_id + '.jpg')
+            if not is_image_exist_or_corrupted(image_file):
+                # flag = True
+                # print('xxx')
+                url_format = 'https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-{iid}.{ext}'
+                default_extention = 'jpg'
+                while True:
+                    try:
+                        # print('yyy')
+                        hd_image_url = url_format.format(iid=wall_id,ext=default_extention)
+                        img_response = session.get(hd_image_url, stream=True,timeout=2)
+                        print(img_response.status_code)
+                        print(img_response.url)
+                        if img_response.ok:
+                            print(wall_id+default_extention)
+                            if write_in_file(img_response,image_file):
+                                total_downloaded += 1
+                                default_extention = 'jpg'
+                                break
+                                # if not is_image_exist_or_corrupted(image_file):
+                                #     break
+                                # else:
+                                #     print(wall_id+"not downloaded property, trying again...")
+                        elif img_response.status_code == 404:
+                            default_extention = 'png'
+                    except Exception as identifier:
+                        print(identifier)
+                        time.sleep(1)
+                        print('trying to reconnect....')
         return True
 
 
