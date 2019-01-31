@@ -6,6 +6,7 @@ import re
 import sys
 import time
 from pathlib import Path
+import json
 
 import requests
 from bs4 import BeautifulSoup
@@ -36,7 +37,7 @@ def is_image_exist_or_corrupted(image_file):
     return False
 
 
-def write_in_file(img_response, image_file):
+def write_image_file(img_response, image_file):
     try:
         with open(image_file, 'wb') as f:
             for chunk in img_response.iter_content():
@@ -76,8 +77,8 @@ def generate_downloadable_image_url(response, session):
                         print(img_response.status_code)
                         print(img_response.url)
                         if img_response.ok:
-                            print(wall_id + default_extention)
-                            if write_in_file(img_response, image_file):
+                            print(wall_id + "." + default_extention)
+                            if write_image_file(img_response, image_file):
                                 total_downloaded += 1
                                 default_extention = 'jpg'
                                 break
@@ -97,19 +98,20 @@ def generate_downloadable_image_url(response, session):
 # tag parser
 def parse_tags(request_url):
     with requests.Session() as session:
-        session.headers.update({
-                                   'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'})
-        response = session.get(request_url)
-        if response.ok:
-            soup = BeautifulSoup(response.text, 'html.parser')
-            tag = soup.find('h1', attrs={'class': 'tagname'}).text
+        session.headers.update({'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'})
+        resp = session.get(request_url)
+        if resp.ok:
+            beautiful_soup = BeautifulSoup(resp.text, 'html.parser')
+            tag = beautiful_soup.find('h1', attrs={'class': 'tagname'}).text
             return tag
 
 
 def write_response_log(resp):
-    with open('log.txt', 'a') as file:
+    log_file_name = resp['date'] + '.json'
+    with open(log_file_name, 'a') as file:
         # data = '['+ datetime.datetime.today().strftime('%B %d,%Y') + ']\n'+url
-        file.write(str(resp) + "\n")
+        # file.write(str(resp) + "\n")
+        json.dump(resp, file)
 
 
 # taking args from cli
@@ -149,25 +151,20 @@ elif args.keyword:
 else:
     print('usage: python3 wallhaven.py -w <keyword>')
 
-file_path_to_save=file_path_to_save.replace("//","/")
+file_path_to_save = file_path_to_save.replace("//", "/")
 print("Downloaded Path: " + file_path_to_save)
 total_downloaded = 0
 
 with requests.Session() as session:
     session.headers.update({
-                               'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'})
+        'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'})
     request_url = ROOT_URL
     if URL_TYPE != 'TAG':
         request_url = ROOT_URL.format(page_number=1)
     try:
         response = session.get(request_url)
-        responseDict = {
-            'response': response,
-            'method': 'get',
-            'url': request_url,
-            'keyword': keyword,
-            'datetime': datetime.datetime.today().strftime("%I:%M%p %B %d, %Y")
-        }
+        response_log_dict = []
+
         if response.ok:
             soup = BeautifulSoup(response.text, 'html.parser')
             divs = soup.find_all('figure', attrs={'class': 'thumb'})
@@ -186,8 +183,17 @@ with requests.Session() as session:
                 # dumping page
                 response = session.get(current_page_url)
                 print('Downloading From: ', current_page_url)
-                responseDict['url'] = current_page_url
-                write_response_log(responseDict)
+                # responseLogs['url'] = current_page_url
+                log_dict = {
+                    'response': response.status_code,
+                    'method': 'get',
+                    'url': current_page_url,
+                    'keyword': keyword,
+                    'datetime': datetime.datetime.today().strftime("%I:%M%p %B %d, %Y"),
+                    'date': datetime.datetime.today().strftime("%B %d, %Y")
+                }
+                response_log_dict.append(log_dict)
+                # write_response_log(responseLogs)
                 flag = generate_downloadable_image_url(response, session)
                 page_number += 1
 
@@ -195,6 +201,7 @@ with requests.Session() as session:
                     flag = False
 
             print("Total Downloaded: ", total_downloaded)
+            write_image_file(response_log_dict)
     except Exception as excp:
         print(excp)
         pass
