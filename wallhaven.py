@@ -36,7 +36,7 @@ def is_image_exist_or_corrupted(image_file):
         os.remove(image_file.resolve())
     return False
 
-
+# write new file from buffer
 def write_image_file(img_response, image_file):
     try:
         with open(image_file, 'wb') as f:
@@ -107,10 +107,12 @@ def parse_tags(request_url):
 
 
 def write_response_log(resp):
+    log_file_dir = Path('logs/').expanduser()
+    log_file_dir.mkdir(parents=True, exist_ok=True)
+
     log_file_name = resp['date'] + '.json'
-    with open(log_file_name, 'a') as file:
-        # data = '['+ datetime.datetime.today().strftime('%B %d,%Y') + ']\n'+url
-        # file.write(str(resp) + "\n")
+    log_file_path = log_file_dir/Path(log_file_name)
+    with open(log_file_path, 'a') as file:
         json.dump(resp, file)
 
 
