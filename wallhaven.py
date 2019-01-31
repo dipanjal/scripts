@@ -15,8 +15,12 @@ ROOT_URL = 'https://alpha.wallhaven.cc/search?q={search_query}&ratios={screen_ra
 DOWNLOAD_PATH = '~/Downloads/{script_name}/{search_query}'
 URL_TYPE = ''
 
-scriptname = sys.argv[0].replace('.py', '')
-file_path_to_save = DOWNLOAD_PATH.format(script_name=scriptname, search_query='{search_query}')
+script_name = sys.argv[0].replace('.py', '')
+
+if '/' in script_name:
+    script_name = script_name.split('/')[-1]
+
+file_path_to_save = DOWNLOAD_PATH.format(script_name=script_name, search_query='{search_query}')
 
 
 # url validation
@@ -35,6 +39,7 @@ def is_image_exist_or_corrupted(image_file):
             return True
         os.remove(image_file.resolve())
     return False
+
 
 # write new file from buffer
 def write_image_file(img_response, image_file):
@@ -98,7 +103,8 @@ def generate_downloadable_image_url(response, session):
 # tag parser
 def parse_tags(request_url):
     with requests.Session() as session:
-        session.headers.update({'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'})
+        session.headers.update({
+                                   'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'})
         resp = session.get(request_url)
         if resp.ok:
             beautiful_soup = BeautifulSoup(resp.text, 'html.parser')
@@ -106,13 +112,16 @@ def parse_tags(request_url):
             return tag
 
 
+# write rspnse logs in a json file
 def write_response_log(resp):
     log_file_dir = Path('logs/').expanduser()
     log_file_dir.mkdir(parents=True, exist_ok=True)
 
-    log_file_name = resp['date'] + '.json'
-    log_file_path = log_file_dir/Path(log_file_name)
-    with open(log_file_path, 'a') as file:
+    date = datetime.datetime.today().strftime("%B %d, %Y")
+    log_file_name = date + '-log.json'
+    log_file_path = log_file_dir / Path(log_file_name)
+    print(log_file_path)
+    with open(log_file_path, 'w') as file:
         json.dump(resp, file)
 
 
@@ -158,8 +167,7 @@ print("Downloaded Path: " + file_path_to_save)
 total_downloaded = 0
 
 with requests.Session() as session:
-    session.headers.update({
-        'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'})
+    session.headers.update({'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'})
     request_url = ROOT_URL
     if URL_TYPE != 'TAG':
         request_url = ROOT_URL.format(page_number=1)
@@ -191,8 +199,7 @@ with requests.Session() as session:
                     'method': 'get',
                     'url': current_page_url,
                     'keyword': keyword,
-                    'datetime': datetime.datetime.today().strftime("%I:%M%p %B %d, %Y"),
-                    'date': datetime.datetime.today().strftime("%B %d, %Y")
+                    'datetime': datetime.datetime.today().strftime("%I:%M%p %B %d, %Y")
                 }
                 response_log_dict.append(log_dict)
                 # write_response_log(responseLogs)
@@ -204,6 +211,6 @@ with requests.Session() as session:
 
             print("Total Downloaded: ", total_downloaded)
             write_response_log(response_log_dict)
-    except Exception as excp:
-        print(excp)
+    except Exception as ex:
+        print(ex)
         pass
