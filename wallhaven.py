@@ -53,6 +53,19 @@ def write_image_file(img_response, image_file):
         return False
 
 
+# write response logs in a json file
+def write_response_log(resp):
+    log_file_dir = Path('logs/').expanduser()
+    log_file_dir.mkdir(parents=True, exist_ok=True)
+
+    date = datetime.datetime.today().strftime("%B %d, %Y")
+    log_file_name = date + '-log.json'
+    log_file_path = log_file_dir / Path(log_file_name)
+    print(log_file_path)
+    with open(log_file_path, 'w') as file:
+        json.dump(resp, file)
+
+
 # image downloaded
 def generate_downloadable_image_url(response, session):
     global total_downloaded
@@ -73,26 +86,32 @@ def generate_downloadable_image_url(response, session):
                 # flag = True
                 # print('xxx')
                 url_format = 'https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-{iid}.{ext}'
-                default_extention = 'jpg'
+                default_extension = 'jpg'
                 while True:
                     try:
                         # print('yyy')
-                        hd_image_url = url_format.format(iid=wall_id, ext=default_extention)
+                        hd_image_url = url_format.format(iid=wall_id, ext=default_extension)
                         img_response = session.get(hd_image_url, stream=True, timeout=2)
                         print(img_response.status_code)
                         print(img_response.url)
+                        # resp_header = img_response.headers
+                        resp_content_length = len(img_response.content)/1024
+                        file_size_in_kb = str(resp_content_length)+" KB"
                         if img_response.ok:
-                            print(wall_id + "." + default_extention)
-                            if write_image_file(img_response, image_file):
-                                total_downloaded += 1
-                                default_extention = 'jpg'
+                            # max image size 1.5 MB
+                            if resp_content_length <= 1500:
+                                print(wall_id + "." + default_extension + ' (' + file_size_in_kb + ')')
+                                image_file = directory_path / Path(wall_id + '.' + default_extension)
+                                if write_image_file(img_response, image_file):
+                                    total_downloaded += 1
+                                    default_extension = 'jpg'
+                                    break
+                            else:
+                                print('Too Large ' + wall_id + "." + default_extension + '(' + file_size_in_kb + ')')
                                 break
-                                # if not is_image_exist_or_corrupted(image_file):
-                                #     break
-                                # else:
-                                #     print(wall_id+"not downloaded property, trying again...")
                         elif img_response.status_code == 404:
-                            default_extention = 'png'
+                            default_extension = 'png'
+
                     except Exception as identifier:
                         print(identifier)
                         time.sleep(1)
@@ -112,17 +131,7 @@ def parse_tags(request_url):
             return tag
 
 
-# write rspnse logs in a json file
-def write_response_log(resp):
-    log_file_dir = Path('logs/').expanduser()
-    log_file_dir.mkdir(parents=True, exist_ok=True)
 
-    date = datetime.datetime.today().strftime("%B %d, %Y")
-    log_file_name = date + '-log.json'
-    log_file_path = log_file_dir / Path(log_file_name)
-    print(log_file_path)
-    with open(log_file_path, 'w') as file:
-        json.dump(resp, file)
 
 
 # taking args from cli
