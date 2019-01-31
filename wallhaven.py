@@ -201,7 +201,7 @@ with requests.Session() as session:
                     flag = False
 
             print("Total Downloaded: ", total_downloaded)
-            write_image_file(response_log_dict)
+            write_response_log(response_log_dict)
     except Exception as excp:
         print(excp)
         pass
