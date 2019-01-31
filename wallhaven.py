@@ -91,23 +91,23 @@ def generate_downloadable_image_url(response, session):
                     try:
                         # print('yyy')
                         hd_image_url = url_format.format(iid=wall_id, ext=default_extension)
-                        img_response = session.get(hd_image_url, stream=True, timeout=2)
-                        print(img_response.status_code)
-                        print(img_response.url)
+                        img_response = session.get(hd_image_url, stream=True, timeout=5)
+                        # print(img_response.status_code)
+                        # print(img_response.url)
                         # resp_header = img_response.headers
-                        resp_content_length = len(img_response.content)/1024
-                        file_size_in_kb = str(resp_content_length)+" KB"
+                        file_size = len(img_response.content)/1024
+                        # file_size_in_kb = str(resp_content_length)+" KB"
                         if img_response.ok:
                             # max image size 1.5 MB
-                            if resp_content_length <= 1500:
-                                print(wall_id + "." + default_extension + ' (' + file_size_in_kb + ')')
+                            if file_size <= 2500:
+                                print(wall_id + "." + default_extension + ' (%.2f' % file_size + 'KB)')
                                 image_file = directory_path / Path(wall_id + '.' + default_extension)
                                 if write_image_file(img_response, image_file):
                                     total_downloaded += 1
                                     default_extension = 'jpg'
                                     break
                             else:
-                                print('Too Large ' + wall_id + "." + default_extension + '(' + file_size_in_kb + ')')
+                                print('Too Large ' + wall_id + "." + default_extension + '(%2f' % file_size + ')')
                                 break
                         elif img_response.status_code == 404:
                             default_extension = 'png'
