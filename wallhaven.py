@@ -14,6 +14,7 @@ from bs4 import BeautifulSoup
 ROOT_URL = 'https://alpha.wallhaven.cc/search?q={search_query}&ratios={screen_ration}&page={page_number}'
 DOWNLOAD_PATH = '~/Downloads/{script_name}/{search_query}'
 URL_TYPE = ''
+keyword = ''
 
 script_name = sys.argv[0].replace('.py', '')
 
@@ -160,6 +161,7 @@ if args.url:
 
     file_path_to_save = file_path_to_save.format(search_query=keyword)
 elif args.keyword:
+    keyword = args.keyword
     file_path_to_save = file_path_to_save.format(search_query=args.keyword)
     if args.ratio:
         print('ratio: ', args.ratio)
