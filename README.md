@@ -11,15 +11,12 @@
 ## Usage
 
 search by url
-```python
-python3 wallhaven.py -u "https://alpha.wallhaven.cc/search?q=id:38424"
-```
-
+```python3 wallhaven.py -u "https://alpha.wallhaven.cc/search?q=id:38424" ```
 search by keyword
-```python
-python3 wallhaven.py -w cats
-```
+```python3 wallhaven.py -w cats ```
 search by keyword with resulation param
-```python
-python3 wallhaven.py -w cats -r 16x9
-```
+```python3 wallhaven.py -w cats -r 16x9 ```
+
+<p align="center">
+  <img src='https://cheat.sh/files/demo-curl.gif'/>
+</p>
