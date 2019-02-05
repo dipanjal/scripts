@@ -17,6 +17,3 @@ search by keyword
 search by keyword with resulation param
 ```python3 wallhaven.py -w cats -r 16x9 ```
 
-<p align="center">
-  <img src='https://cheat.sh/files/demo-curl.gif'/>
-</p>
