@@ -19,6 +19,6 @@
 
 ## Demo
 
-<p align="center">
+<p >
   <img src='https://cheat.sh/files/demo-curl.gif'/>
 </p>
