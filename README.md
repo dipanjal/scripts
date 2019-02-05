@@ -7,10 +7,14 @@ sudo apt install pip3
 ```
 #### install [beautiful soup 4](https://www.crummy.com/software/BeautifulSoup/bs4/doc/#quick-start) <br>
 ```python
-pip install beautifulsoup4
+pip3 install beautifulsoup4
 ```
-## Usage
+#### install [requests](https://pypi.org/project/requests/) <br>
+```python
+pip3 install requests
+```
 
+## Usage
 
 search by url
 ```python
