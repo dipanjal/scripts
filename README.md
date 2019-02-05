@@ -10,10 +10,10 @@
 
 ## Usage
 
-search by url
+#### search by url
 ```python3 wallhaven.py -u "https://alpha.wallhaven.cc/search?q=id:38424" ```
-search by keyword
+#### search by keyword
 ```python3 wallhaven.py -w cats ```
-search by keyword with resulation param
+#### search by keyword with resulation param
 ```python3 wallhaven.py -w cats -r 16x9 ```
 
