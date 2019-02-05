@@ -17,3 +17,8 @@
 #### search by keyword with resulation param
 ```python3 wallhaven.py -w cats -r 16x9 ```
 
+## Demo
+
+<p align="center">
+  <img src='https://cheat.sh/files/demo-curl.gif'/>
+</p>
