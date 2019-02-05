@@ -11,7 +11,17 @@
 ```
 ## Usage
 
+
+search by url
+```python
+"python3 wallhaven.py -u "https://alpha.wallhaven.cc/search?q=id:38424" "
+```
+
 search by keyword
 ```python
-"python3 wallhaven.py cats"
+"python3 wallhaven.py -w cats"
+```
+search by keyword with resulation param
+```python
+"python3 wallhaven.py -w cats -r 16x9"
 ```
