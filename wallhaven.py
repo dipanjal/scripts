@@ -15,6 +15,7 @@ ROOT_URL = 'https://alpha.wallhaven.cc/search?q={search_query}&ratios={screen_ra
 DOWNLOAD_PATH = '~/Downloads/{script_name}/{search_query}'
 URL_TYPE = ''
 keyword = ''
+is_NSFW = False
 
 script_name = sys.argv[0].replace('.py', '')
 
@@ -68,7 +69,7 @@ def write_response_log(resp):
 
 
 # image downloaded
-def generate_downloadable_image_url(response, session):
+def download_images_from_current_page(response, session):
     global total_downloaded
     soup = BeautifulSoup(response.text, 'html.parser')
     divs = soup.find_all('figure', attrs={'class': 'thumb'})
@@ -90,13 +91,9 @@ def generate_downloadable_image_url(response, session):
                 default_extension = 'jpg'
                 while True:
                     try:
-                        # print('yyy')
                         hd_image_url = url_format.format(iid=wall_id, ext=default_extension)
                         img_response = session.get(hd_image_url, stream=True, timeout=5)
-                        # print(img_response.status_code)
-                        # print(img_response.url)
-                        # resp_header = img_response.headers
-                        file_size = len(img_response.content)/1024
+                        file_size = len(img_response.content) / 2048
                         # file_size_in_kb = str(resp_content_length)+" KB"
                         if img_response.ok:
                             # max image size 1.5 MB
@@ -122,17 +119,15 @@ def generate_downloadable_image_url(response, session):
 
 # tag parser
 def parse_tags(request_url):
+
     with requests.Session() as session:
         session.headers.update({
-                                   'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'})
+            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'})
         resp = session.get(request_url)
         if resp.ok:
             beautiful_soup = BeautifulSoup(resp.text, 'html.parser')
             tag = beautiful_soup.find('h1', attrs={'class': 'tagname'}).text
             return tag
-
-
-
 
 
 # taking args from cli
@@ -158,6 +153,9 @@ if args.url:
         keyword = args.url[start_index:end_index].strip()
         if keyword == '':
             keyword = datetime.datetime.today().strftime('%B %d,%Y')
+        if 'purity=001' in args.url:
+            global is_NSFW
+            is_NSFW = True
 
     file_path_to_save = file_path_to_save.format(search_query=keyword)
 elif args.keyword:
@@ -173,12 +171,37 @@ elif args.keyword:
 else:
     print('usage: python3 wallhaven.py -w <keyword>')
 
+
+def login_wallhaven(session):
+    login_url = 'https://alpha.wallhaven.cc/auth/login'
+    login_page = session.get(login_url)
+
+    if login_page.ok:
+        soup = BeautifulSoup(login_page.text, 'html.parser')
+        token = soup.findAll('input', {'name': '_token'})[0]['value']
+
+        payload = {
+            '_token': token,
+            'username': 'femebobi@next2cloud.info',
+            'password': '123456'
+        }
+
+        response = session.post(login_url, data=payload)
+        # print('logged in')
+        return session
+
+
 file_path_to_save = file_path_to_save.replace("//", "/")
 print("Downloaded Path: " + file_path_to_save)
 total_downloaded = 0
 
 with requests.Session() as session:
-    session.headers.update({'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'})
+    session.headers.update({'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                                          'Chrome/71.0.3578.98 Safari/537.36'})
+    if is_NSFW:
+        session = login_wallhaven(session)
+        print("NSFW Content Allowed")
+
     request_url = ROOT_URL
     if URL_TYPE != 'TAG':
         request_url = ROOT_URL.format(page_number=1)
@@ -214,7 +237,7 @@ with requests.Session() as session:
                 }
                 response_log_dict.append(log_dict)
                 # write_response_log(responseLogs)
-                flag = generate_downloadable_image_url(response, session)
+                flag = download_images_from_current_page(response, session)
                 page_number += 1
 
                 if URL_TYPE == 'TAG':
