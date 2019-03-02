@@ -137,7 +137,8 @@ group.add_argument('-u', '--url', nargs='?', const='fixed_url', action='store', 
                    help='search by \"<fixed_url>\"')
 group.add_argument('-w', '--keyword', nargs='?', const='keyword', action='store', type=str, help='search by keyword')
 parser.add_argument('-r', '--ratio', nargs='?', const='ratio', action='store', help='set screen ratio')
-# parser.add_argument('-x','--extreme',const='extreme',action='store',help='set extreme')
+parser.add_argument('-x', '--nsfw', nargs='?', const='true', action='store', help='unlock nude content')
+
 args = parser.parse_args()
 
 # args handlers
@@ -154,20 +155,21 @@ if args.url:
         if keyword == '':
             keyword = datetime.datetime.today().strftime('%B %d,%Y')
         if 'purity=001' in args.url:
-            global is_NSFW
             is_NSFW = True
 
     file_path_to_save = file_path_to_save.format(search_query=keyword)
 elif args.keyword:
     keyword = args.keyword
     file_path_to_save = file_path_to_save.format(search_query=args.keyword)
+    if args.nsfw:
+        is_NSFW = True
     if args.ratio:
         print('ratio: ', args.ratio)
         ROOT_URL = ROOT_URL.format(search_query=args.keyword, page_number='{page_number}', screen_ration=args.ratio)
     else:
         ROOT_URL = str(
             ROOT_URL.format(search_query=args.keyword, page_number='{page_number}', screen_ration='')).replace(
-            '&ratios=', '')
+            '&ratios=', '').replace('&screen_ration','')
 else:
     print('usage: python3 wallhaven.py -w <keyword>')
 
