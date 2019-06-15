@@ -11,7 +11,8 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
-ROOT_URL = 'https://alpha.wallhaven.cc/search?q={search_query}&ratios={screen_ration}&page={page_number}'
+# ROOT_URL = 'https://alpha.wallhaven.cc/search?q={search_query}&ratios={screen_ration}&page={page_number}'
+ROOT_URL = 'https://wallhaven.cc/search?q={search_query}&ratios={screen_ration}&page={page_number}'
 DOWNLOAD_PATH = '~/Downloads/{script_name}/{search_query}'
 URL_TYPE = ''
 keyword = ''
@@ -87,11 +88,15 @@ def download_images_from_current_page(response, session):
             if not is_image_exist_or_corrupted(image_file):
                 # flag = True
                 # print('xxx')
-                url_format = 'https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-{iid}.{ext}'
+                # url_format = 'https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-{iid}.{ext}'
+                id_prefix = wall_id[:2]
+                url_format = 'https://w.wallhaven.cc/full/{iid_prefix}/wallhaven-{iid}.{ext}'
+                # https://w.wallhaven.cc/full/j8/wallhaven-j8q1xy.jpg
                 default_extension = 'jpg'
                 while True:
                     try:
-                        hd_image_url = url_format.format(iid=wall_id, ext=default_extension)
+                        hd_image_url = url_format.format(iid_prefix=id_prefix,iid=wall_id, ext=default_extension)
+                        print(hd_image_url)
                         img_response = session.get(hd_image_url, stream=True, timeout=5)
                         file_size = len(img_response.content) / 2048
                         # file_size_in_kb = str(resp_content_length)+" KB"
@@ -208,6 +213,7 @@ with requests.Session() as session:
     if URL_TYPE != 'TAG':
         request_url = ROOT_URL.format(page_number=1)
     try:
+        # print(request_url)
         response = session.get(request_url)
         response_log_dict = []
 
