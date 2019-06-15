@@ -180,8 +180,8 @@ else:
 
 
 def login_wallhaven(session):
-    login_url = 'https://wallhaven.cc/auth/login'
-    login_page = session.get(login_url)
+    login_page_url = 'https://wallhaven.cc/login'
+    login_page = session.get(login_page_url)
 
     if login_page.ok:
         soup = BeautifulSoup(login_page.text, 'html.parser')
@@ -193,9 +193,12 @@ def login_wallhaven(session):
             'password': '123456'
         }
 
-        response = session.post(login_url, data=payload)
-        # print('logged in')
-        return session
+        login_post_url = 'https://wallhaven.cc/auth/login'
+        response = session.post(login_post_url, data=payload)
+        # global is_NSFW
+        # if not response.ok:
+        #     is_NSFW = False
+        return (session,response)
 
 
 file_path_to_save = file_path_to_save.replace("//", "/")
@@ -206,8 +209,9 @@ with requests.Session() as session:
     session.headers.update({'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
                                           'Chrome/71.0.3578.98 Safari/537.36'})
     if is_NSFW:
-        session = login_wallhaven(session)
-        print("NSFW Content Allowed")
+        session, response = login_wallhaven(session)
+        if response.ok:
+            print("NSFW Content Allowed")
 
     request_url = ROOT_URL
     if URL_TYPE != 'TAG':
