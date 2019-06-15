@@ -180,7 +180,7 @@ else:
 
 
 def login_wallhaven(session):
-    login_url = 'https://alpha.wallhaven.cc/auth/login'
+    login_url = 'https://wallhaven.cc/auth/login'
     login_page = session.get(login_url)
 
     if login_page.ok:
