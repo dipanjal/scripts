@@ -1,4 +1,9 @@
-pip3 install numpy --user 
-pip3 install opencv-python --user
-pip3 install beautifulsoup4 --user
-pip3 install requests --user
+beautifulsoup4==4.8.0
+certifi==2019.9.11
+chardet==3.0.4
+idna==2.8
+numpy==1.17.2
+opencv-python==4.1.1.26
+requests==2.22.0
+soupsieve==1.9.4
+urllib3==1.25.6

@@ -159,8 +159,12 @@ if args.url:
         keyword = args.url[start_index:end_index].strip()
         if keyword == '':
             keyword = datetime.datetime.today().strftime('%B %d,%Y')
-        if 'purity=001' in args.url:
-            is_NSFW = True
+
+        # extracting NSFW flag from url
+        if 'purity=' in args.url:
+            purity_bit_mask = re.findall(r'purity=\d{3}', args.url)[0].replace('purity=', '')
+            nsfw_bit = purity_bit_mask[2:]
+            is_NSFW = True if nsfw_bit is '1' else False
 
     file_path_to_save = file_path_to_save.format(search_query=keyword)
 elif args.keyword:
