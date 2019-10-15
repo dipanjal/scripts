@@ -5,3 +5,5 @@ logs/
 tests/
 docker/
 log.txt
+venv
+downloads
